@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>设计起点 · Web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet"></noscript>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --canvas:        #faf9f5;
+  --ink:           #141413;
+  --surface-soft:  #f5f0e8;
+  --surface-card:  #efe9de;
+  --surface-dark:  #181715;
+  --surface-dark-elevated: #252320;
+  --primary:       #cc785c;
+  --primary-active:#a9583e;
+  --hairline:      #e6dfd8;
+  --body:          #3d3d3a;
+  --muted:         #6c6a64;
+  --muted-soft:    #8e8b82;
+  --on-primary:    #ffffff;
+  --on-dark:       #faf9f5;
+  --on-dark-soft:  #a09d96;
+  --r-sm: 6px; --r-md: 8px; --r-lg: 12px; --r-xl: 16px; --r-pill: 9999px;
+}
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+header {
+  height: 64px;
+  border-bottom: 1px solid var(--hairline);
+  display: flex;
+  align-items: flex-end;
+  padding: 0 40px 14px;
+  position: sticky;
+  top: 0;
+  background: var(--canvas);
+  z-index: 100;
+}
+.title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+}
+.subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin-left: 16px;
+  font-weight: 400;
+  padding-bottom: 1px;
+}
+
+main { max-width: 900px; margin: 0 auto; padding: 0 40px 96px; }
+
+.hero-block {
+  padding: 40px 0 32px;
+  margin-bottom: 0;
+}
+.hero-headline {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 1.08;
+  color: var(--ink);
+  letter-spacing: -1.2px;
+  margin-bottom: 10px;
+  max-width: 640px;
+}
+.hero-sub {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--body);
+  line-height: 1.55;
+  max-width: 520px;
+  margin-bottom: 0;
+}
+
+.sec-eyebrow {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.section { margin-bottom: 40px; }
+.divider { border: none; border-top: 1px solid var(--hairline); margin: 0 0 40px; }
+
+.style-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.scard { border-radius: var(--r-lg); overflow: hidden; cursor: pointer; border: 1px solid var(--hairline); transition: all 0.12s; background: var(--canvas); }
+.scard:hover { border-color: var(--muted); }
+.scard.picked { border-color: var(--primary); border-width: 2px; }
+.scard.picked .slabel { background: var(--primary); }
+.scard.picked .slname { color: var(--on-primary); }
+.scard.picked .sldesc { color: rgba(255,255,255,0.7); }
+.sbrowser { padding: 6px 10px 0; background: var(--surface-card); display: flex; align-items: center; gap: 4px; }
+.sdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.sbar { flex: 1; height: 11px; border-radius: 3px; margin-left: 5px; background: var(--canvas); }
+.spreview { overflow: hidden; position: relative; aspect-ratio: 16/10; }
+@supports not (aspect-ratio: 16/10) {
+  .spreview { height: 0; padding-top: 62.5%; }
+  .spreview > div:first-child { position: absolute; inset: 0; }
+}
+.schk { display: none; position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; background: var(--primary); border-radius: 50%; align-items: center; justify-content: center; z-index: 10; }
+.schk svg { width: 10px; height: 10px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.scard.picked .schk { display: flex; }
+.slabel { padding: 12px 14px; border-top: 1px solid var(--hairline); transition: background 0.12s; background: var(--canvas); }
+.slname { font-size: 14px; font-weight: 500; color: var(--ink); }
+.sldesc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.canvas-section { margin-bottom: 64px; }
+.canvas-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+.canvas-toolbar { display: flex; gap: 6px; flex-wrap: wrap; }
+.tool-btn {
+  padding: 7px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--hairline);
+  background: var(--canvas);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  transition: all 0.1s;
+  white-space: nowrap;
+}
+.tool-btn:hover { border-color: var(--ink); color: var(--ink); }
+.tool-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+.expand-btn {
+  padding: 7px 16px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--primary);
+  background: var(--canvas);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--primary);
+  cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  transition: all 0.1s;
+  white-space: nowrap;
+}
+.expand-btn:hover { background: var(--primary); color: var(--on-primary); }
+.expand-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; }
+
+.canvas-viewport {
+  width: 100%;
+  border-radius: var(--r-xl);
+  border: 1px solid var(--hairline);
+  background: var(--canvas);
+  overflow: hidden;
+  position: relative;
+  cursor: default;
+}
+.canvas-scaled { transform-origin: top left; position: relative; }
+#canvas, #canvasFull { position: relative; background: var(--canvas); }
+.canvas-viewport,
+.overlay-viewport { scrollbar-width: none; -ms-overflow-style: none; }
+.canvas-scaled::-webkit-scrollbar,
+.overlay-viewport::-webkit-scrollbar { display: none; }
+.canvas-hint { font-size: 12px; color: var(--muted-soft); margin-top: 10px; }
+.canvas-empty {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; pointer-events: none;
+}
+.canvas-empty-icon { font-size: 24px; opacity: 0.2; }
+.canvas-empty-text { font-size: 14px; font-weight: 400; color: var(--muted); }
+
+.canvas-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(20,20,19,0.6); align-items: center; justify-content: center; }
+.canvas-overlay.open { display: flex; }
+.canvas-overlay-inner { background: var(--canvas); border-radius: var(--r-xl); overflow: hidden; position: relative; box-shadow: 0 24px 80px rgba(20,20,19,0.25); }
+.overlay-toolbar { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; padding: 10px 14px; background: var(--surface-soft); border-bottom: 1px solid var(--hairline); }
+.overlay-close {
+  margin-left: auto; padding: 7px 16px; border-radius: var(--r-md);
+  border: 1px solid var(--hairline); background: var(--canvas);
+  font-size: 13px; font-family: inherit; color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; gap: 5px; font-weight: 500; transition: all 0.1s;
+}
+.overlay-close:hover { border-color: var(--ink); color: var(--ink); }
+.overlay-viewport { overflow: hidden; position: relative; }
+.overlay-scaled { transform-origin: top left; position: relative; }
+
+.el { position: absolute; cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; }
+.el:active { cursor: grabbing; }
+.el.sel { outline: 2px solid var(--primary); outline-offset: 1px; z-index: 100; }
+.rh { position: absolute; bottom: -5px; right: -5px; width: 10px; height: 10px; background: var(--primary); border-radius: 2px; cursor: se-resize; z-index: 200; display: none; }
+.el.sel .rh { display: block; }
+
+.c-nav { background: var(--canvas); border: 1px solid var(--hairline); border-bottom: 2px solid var(--hairline); display: flex; align-items: center; padding: 0 32px; gap: 20px; justify-content: space-between; }
+.c-nav-logo { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 18px; font-weight: 400; color: var(--primary); letter-spacing: -0.2px; }
+.c-nav-links { display: flex; gap: 24px; }
+.c-nav-link { font-size: 14px; color: var(--muted); font-weight: 500; }
+.c-nav-cta { padding: 8px 16px; background: var(--primary); color: #fff; border-radius: var(--r-md); font-size: 13px; font-weight: 500; }
+
+.c-hero { background: var(--surface-soft); border: 1px solid var(--hairline); display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 64px 72px; gap: 16px; }
+.c-hero-tag { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; }
+.c-hero-title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 52px; font-weight: 400; color: var(--ink); line-height: 1.08; letter-spacing: -1.2px; }
+.c-hero-sub { font-size: 17px; color: var(--body); line-height: 1.55; max-width: 480px; font-weight: 400; }
+.c-hero-btn { margin-top: 8px; padding: 12px 20px; background: var(--primary); color: #fff; border-radius: var(--r-md); font-size: 14px; font-weight: 500; display: inline-block; }
+
+.c-card { background: var(--surface-card); border: 1px solid var(--hairline); border-radius: var(--r-lg); display: flex; flex-direction: column; overflow: hidden; }
+.c-card-img { height: 45%; background: var(--canvas); border-bottom: 1px solid var(--hairline); flex-shrink: 0; }
+.c-card-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.c-card-title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 20px; font-weight: 400; color: var(--ink); letter-spacing: -0.3px; }
+.c-card-desc { font-size: 14px; color: var(--body); line-height: 1.55; font-weight: 400; }
+
+.c-btn { background: var(--primary); color: #fff; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; }
+.c-input { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-md); display: flex; align-items: center; padding: 0 14px; gap: 8px; position: relative; }
+.c-input-label { font-size: 11px; font-weight: 500; color: var(--muted-soft); position: absolute; top: -18px; left: 0; letter-spacing: 1px; text-transform: uppercase; }
+.c-input-text { font-size: 14px; color: var(--muted-soft); }
+.c-text { border: 1px dashed var(--hairline); border-radius: var(--r-md); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.c-text-h { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 36px; font-weight: 400; color: var(--ink); line-height: 1.15; letter-spacing: -0.5px; }
+.c-text-p { font-size: 16px; color: var(--body); line-height: 1.55; font-weight: 400; }
+.c-img { background: var(--surface-card); border: 1px solid var(--hairline); border-radius: var(--r-lg); position: relative; overflow: hidden; }
+.c-img::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(45deg,var(--hairline) 0,var(--hairline) 1px,transparent 0,transparent 50%) 0/12px 12px; }
+.c-footer { background: var(--surface-dark); border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; }
+.c-footer-logo { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 16px; font-weight: 400; color: var(--primary); letter-spacing: -0.2px; }
+.c-footer-links { display: flex; gap: 20px; }
+.c-footer-link { font-size: 13px; color: var(--on-dark-soft); }
+.c-footer-copy { font-size: 12px; color: var(--on-dark-soft); }
+
+.comp-tag {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.5px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.1s;
+  text-transform: uppercase;
+}
+.el:hover .comp-tag,
+.el.sel .comp-tag { opacity: 1; }
+
+[contenteditable] { outline: none; cursor: text; }
+[contenteditable]:focus { background: rgba(204,120,92,0.1); border-radius: 2px; }
+
+.output-block {
+  background: var(--surface-dark);
+  border-radius: var(--r-xl);
+  padding: 40px 40px 36px;
+}
+.output-block .sec-eyebrow { color: var(--on-dark-soft); }
+.prompt-box {
+  background: var(--surface-dark-elevated);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--on-dark);
+  white-space: pre-wrap;
+  min-height: 80px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.prompt-box.empty { color: var(--on-dark-soft); font-style: italic; font-family: inherit; }
+
+.action-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.gen-btn {
+  flex: 1;
+  padding: 12px 24px;
+  border-radius: var(--r-md);
+  border: none;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  min-width: 120px;
+  transition: background 0.12s;
+}
+.gen-btn:hover { background: var(--primary-active); }
+.gen-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.copy-btns { display: flex; gap: 8px; }
+.copy-btn {
+  padding: 12px 16px;
+  border-radius: var(--r-md);
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent;
+  color: var(--on-dark-soft);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+  transition: all 0.12s;
+  font-weight: 500;
+}
+.copy-btn:hover { border-color: var(--on-dark); color: var(--on-dark); }
+.copy-btn.copied { color: #5db872; border-color: #5db872; }
+
+@media (max-width: 600px) {
+  header { padding: 0 20px 14px; }
+  main { padding-left: 20px; padding-right: 20px; }
+  .hero-headline { font-size: 36px; }
+  .style-grid { grid-template-columns: 1fr; }
+  .action-row { flex-direction: column; }
+  .copy-btns { width: 100%; }
+  .copy-btn { flex: 1; justify-content: center; }
+  .output-block { padding: 28px 20px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title">设计起点</div>
+  <div class="subtitle">快速生成一个方向足够准的设计 prompt</div>
+</header>
+
+<main>
+
+<div class="hero-block">
+  <div class="hero-headline">从想法到第一个起点</div>
+  <div class="hero-sub">选定视觉风格，拖拽搭建 Web 页面结构，生成可直接粘贴到 Claude Design 或 Stitch 的设计 prompt。</div>
+</div>
+
+<div style="height:32px;"></div>
+
+<div class="section">
+  <div class="sec-eyebrow">视觉风格</div>
+  <div class="style-grid" id="styleGrid"></div>
+</div>
+
+<hr class="divider">
+
+<div class="canvas-section">
+  <div class="canvas-header">
+    <div class="sec-eyebrow" style="margin-bottom:0;">页面布局</div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <div class="canvas-toolbar" id="mainToolbar"></div>
+      <button class="expand-btn" onclick="openOverlay()">
+        <svg viewBox="0 0 16 16"><path d="M10 2h4v4M6 14H2v-4M14 2l-5 5M2 14l5-5"/></svg>
+        展开
+      </button>
+    </div>
+  </div>
+
+  <div class="canvas-viewport" id="canvasViewport">
+    <div class="canvas-scaled" id="canvasScaled">
+      <div id="canvas"></div>
+    </div>
+    <div class="canvas-empty" id="canvasEmpty">
+      <div class="canvas-empty-icon">⊞</div>
+      <div class="canvas-empty-text">点击上方组件，开始搭建 Web 页面</div>
+    </div>
+  </div>
+  <div class="canvas-hint" id="scaleHint"></div>
+</div>
+
+<div class="canvas-overlay" id="overlay">
+  <div class="canvas-overlay-inner" id="overlayInner">
+    <div class="overlay-toolbar" id="overlayToolbar"></div>
+    <div class="overlay-viewport" id="overlayViewport">
+      <div class="overlay-scaled" id="overlayScaled">
+        <div id="canvasFull"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="output-block">
+  <div class="sec-eyebrow" style="margin-bottom:14px;color:#666;">生成结果</div>
+  <textarea id="userDesc" placeholder="用一句话描述你要做的 Web 产品或页面，比如：面向独立开发者的 SaaS 落地页" style="width:100%;padding:14px 16px;border:1px solid rgba(255,255,255,0.1);border-radius:12px;font-size:14px;font-family:inherit;color:#faf9f5;background:#252320;resize:vertical;min-height:72px;line-height:1.6;outline:none;margin-bottom:12px;" onfocus="this.style.borderColor='rgba(204,120,92,0.6)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"></textarea>
+  <div style="margin-bottom:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-size:12px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:#a09d96;">DESIGN.MD（可选）</div>
+      <a href="https://getdesign.md/" target="_blank" rel="noopener noreferrer" style="font-size:13px;font-weight:500;color:#a09d96;border:1px solid rgba(255,255,255,0.1);padding:7px 16px;border-radius:8px;text-decoration:none;transition:all 0.12s;" onmouseover="this.style.color='#faf9f5';this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.color='#a09d96';this.style.borderColor='rgba(255,255,255,0.1)'">获取 DESIGN.md ↗</a>
+    </div>
+    <textarea id="designMdInput" placeholder="将 DESIGN.md 的内容粘贴到这里，会一并写入 prompt..." style="width:100%;padding:14px 16px;border:1px solid rgba(255,255,255,0.1);border-radius:12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:#faf9f5;background:#252320;resize:vertical;min-height:80px;line-height:1.6;outline:none;" onfocus="this.style.borderColor='rgba(204,120,92,0.6)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"></textarea>
+  </div>
+  <div class="prompt-box empty" id="promptOut">选择视觉风格后点击「生成 Prompt」</div>
+  <div class="action-row">
+    <button class="gen-btn" onclick="generatePrompt()">生成 Prompt</button>
+    <div class="copy-btns">
+      <button class="copy-btn" id="btnClaude" onclick="copyFor('claude')">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="4" width="8" height="8" rx="1"/><path d="M2 10V2h8"/></svg>
+        Claude Design
+      </button>
+      <button class="copy-btn" id="btnStitch" onclick="copyFor('stitch')">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="4" width="8" height="8" rx="1"/><path d="M2 10V2h8"/></svg>
+        Stitch
+      </button>
+    </div>
+  </div>
+</div>
+</main>
+
+<script>
+const CANVAS = { W: 1440, H: 2700, VH: 900 };
+
+function getDims() { return CANVAS; }
+
+const sel = { style: null, styleDesc: null };
+let comps = [], selectedEl = null, dragState = null;
+let isOverlay = false;
+let inlineScale = 1;
+let scrollOffsetY = 0;
+
+const fontMap = {
+  '简约（标准）': 'Inter',
+  '大胆（不规则）': 'Space Grotesk'
+};
+
+const compDefs = {
+  nav:    { w: 1440, h: 72,  resizable: false },
+  hero:   { w: 1440, h: 520, resizable: true  },
+  card:   { w: 360,  h: 280, resizable: true  },
+  btn:    { w: 200,  h: 52,  resizable: true  },
+  input:  { w: 320,  h: 52,  resizable: true  },
+  text:   { w: 560,  h: 140, resizable: true  },
+  img:    { w: 400,  h: 280, resizable: true  },
+  footer: { w: 1440, h: 80,  resizable: false },
+};
+
+function getCompDef(type) { return compDefs[type]; }
+
+function getPreviewHTML(styleNum) {
+  if (styleNum === 1) return `
+    <div style="background:#fff;width:100%;height:100%;position:relative;">
+      <div style="height:28px;background:#fff;border-bottom:1px solid #eee;display:flex;align-items:center;padding:0 14px;justify-content:space-between;"><div style="width:32px;height:6px;background:#111;border-radius:1px;"></div><div style="display:flex;gap:8px;"><div style="width:18px;height:4px;background:#ddd;border-radius:1px;"></div><div style="width:18px;height:4px;background:#ddd;border-radius:1px;"></div><div style="width:18px;height:4px;background:#111;border-radius:1px;"></div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;height:90px;"><div style="padding:14px;display:flex;flex-direction:column;justify-content:center;gap:6px;"><div style="width:80%;height:8px;background:#111;border-radius:1px;"></div><div style="width:90%;height:4px;background:#ddd;border-radius:1px;"></div><div style="width:38px;height:14px;background:#111;border-radius:2px;margin-top:3px;"></div></div><div style="background:#f0f0f0;"></div></div>
+      <div style="height:1px;background:#eee;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;"><div style="padding:8px;border-right:1px solid #eee;"><div style="height:30px;background:#f5f5f5;margin-bottom:4px;border-radius:2px;"></div><div style="width:70%;height:3px;background:#ccc;border-radius:1px;"></div></div><div style="padding:8px;border-right:1px solid #eee;"><div style="height:30px;background:#f2f2f2;margin-bottom:4px;border-radius:2px;"></div><div style="width:70%;height:3px;background:#ccc;border-radius:1px;"></div></div><div style="padding:8px;"><div style="height:30px;background:#f5f5f5;margin-bottom:4px;border-radius:2px;"></div><div style="width:70%;height:3px;background:#ccc;border-radius:1px;"></div></div></div>
+    </div>`;
+  return `
+    <div style="background:#fff;width:100%;height:100%;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:10px;left:12px;width:32px;height:6px;background:#111;border-radius:1px;"></div>
+      <div style="position:absolute;top:34px;left:12px;width:50%;height:10px;background:#111;border-radius:1px;"></div>
+      <div style="position:absolute;top:52px;left:12px;width:34%;height:5px;background:#ddd;border-radius:1px;"></div>
+      <div style="position:absolute;top:66px;left:12px;width:36px;height:14px;background:#111;border-radius:2px;"></div>
+      <div style="position:absolute;top:20px;right:8px;width:35%;height:76px;background:#f0f0f0;border-radius:3px;transform:rotate(2.5deg);"></div>
+      <div style="position:absolute;top:105px;left:6px;width:42%;height:62px;background:#f2f2f2;border-radius:3px;transform:rotate(-1.5deg);"></div>
+      <div style="position:absolute;top:116px;left:46%;width:36%;height:48px;background:#ebebeb;border-radius:3px;transform:rotate(1.5deg);"></div>
+      <div style="position:absolute;bottom:18px;right:12px;width:40px;height:16px;background:#111;border-radius:3px;"></div>
+    </div>`;
+}
+
+function renderStyleCards() {
+  const grid = document.getElementById('styleGrid');
+  const styles = [
+    { n: 1, name: '简约（标准）', desc: '布局规整，网格对齐，结构清晰可读，留白充足，视觉层级分明', label: '网格对齐 · 结构一眼可读' },
+    { n: 2, name: '大胆（不规则）', desc: '打破网格，元素自由错位叠加，不对称构图，结构难以预测，视觉张力强', label: '自由错位 · 结构难以预测' },
+  ];
+  grid.innerHTML = styles.map(s => `
+    <div class="scard ${sel.style === s.name ? 'picked' : ''}" id="s${s.n}" onclick="pickStyle(${s.n},'${s.name}','${s.desc}')">
+      <div class="sbrowser"><div class="sdot" style="background:#ff5f57;"></div><div class="sdot" style="background:#febc2e;"></div><div class="sdot" style="background:#28c840;"></div><div class="sbar"></div></div>
+      <div class="spreview">
+        ${getPreviewHTML(s.n)}
+        <div class="schk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+      </div>
+      <div class="slabel">
+        <div class="slname">${s.name}</div>
+        <div class="sldesc">${s.label}</div>
+      </div>
+    </div>`).join('');
+}
+
+function getToolbarHTML() {
+  const types = ['nav','hero','card','btn','input','text','img','footer'];
+  const labels = { nav:'导航栏', hero:'Hero', card:'卡片', btn:'按钮', input:'输入框', text:'文字块', img:'图片', footer:'页脚' };
+  return types.map(t => `<button class="tool-btn" onclick="addComp('${t}')">${labels[t]}</button>`).join('') +
+    `<button class="tool-btn" onclick="clearCanvas()"><svg viewBox="0 0 16 16"><polyline points="3,4 13,4"/><path d="M5 4V3h6v1M5 4l1 9h4l1-9"/></svg></button>`;
+}
+
+function refreshToolbars() {
+  const html = getToolbarHTML();
+  document.getElementById('mainToolbar').innerHTML = html;
+  document.getElementById('overlayToolbar').innerHTML = html +
+    `<button class="overlay-close" onclick="closeOverlay()"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;"><path d="M12 4L4 12M4 4l8 8"/></svg>收起</button>`;
+}
+
+function makeCompHTML(type) {
+  switch(type) {
+    case 'nav': return `<div class="comp-tag">导航栏</div><div class="c-nav" style="height:100%;width:100%;"><div class="c-nav-logo" contenteditable="true" spellcheck="false">Logo</div><div class="c-nav-links"><span class="c-nav-link" contenteditable="true" spellcheck="false">首页</span><span class="c-nav-link" contenteditable="true" spellcheck="false">产品</span><span class="c-nav-link" contenteditable="true" spellcheck="false">关于</span></div><div class="c-nav-cta" contenteditable="true" spellcheck="false">开始使用</div></div>`;
+    case 'hero': return `<div class="comp-tag">Hero</div><div class="c-hero" style="height:100%;width:100%;"><div class="c-hero-tag" contenteditable="true" spellcheck="false">产品标语</div><div class="c-hero-title" contenteditable="true" spellcheck="false">产品主标题<br>写在这里</div><div class="c-hero-sub" contenteditable="true" spellcheck="false">这里是副标题，描述产品核心价值，简洁有力。</div><div class="c-hero-btn" contenteditable="true" spellcheck="false">立即开始</div></div>`;
+    case 'card': return `<div class="comp-tag">卡片</div><div class="c-card" style="height:100%;width:100%;"><div class="c-card-img"></div><div class="c-card-body"><div class="c-card-title" contenteditable="true" spellcheck="false">卡片标题</div><div class="c-card-desc" contenteditable="true" spellcheck="false">这里是卡片描述文字，简短说明内容。</div></div></div>`;
+    case 'btn': return `<div class="comp-tag">按钮</div><div class="c-btn" style="height:100%;width:100%;"><span contenteditable="true" spellcheck="false">按钮文字</span></div>`;
+    case 'input': return `<div class="comp-tag">输入框</div><div class="c-input" style="height:100%;width:100%;"><div class="c-input-label" contenteditable="true" spellcheck="false">标签名称</div><div class="c-input-text" contenteditable="true" spellcheck="false">请输入内容...</div></div>`;
+    case 'text': return `<div class="comp-tag">文字块</div><div class="c-text" style="height:100%;width:100%;"><div class="c-text-h" contenteditable="true" spellcheck="false">标题文字</div><div class="c-text-p" contenteditable="true" spellcheck="false">这里是正文内容，可以写多行。描述产品功能、价值主张或其他信息。</div></div>`;
+    case 'img': return `<div class="comp-tag">图片</div><div class="c-img" style="height:100%;width:100%;"></div>`;
+    case 'footer': return `<div class="comp-tag">页脚</div><div class="c-footer" style="height:100%;width:100%;"><div class="c-footer-logo" contenteditable="true" spellcheck="false">Brand</div><div class="c-footer-links"><span class="c-footer-link" contenteditable="true" spellcheck="false">隐私政策</span><span class="c-footer-link" contenteditable="true" spellcheck="false">使用条款</span><span class="c-footer-link" contenteditable="true" spellcheck="false">联系我们</span></div><div class="c-footer-copy" contenteditable="true" spellcheck="false">© 2026</div></div>`;
+  }
+}
+
+function getScale() {
+  if (isOverlay) {
+    const t = document.getElementById('overlayScaled').style.transform || '';
+    const m = t.match(/scale\(([^)]+)\)/);
+    return m ? parseFloat(m[1]) : 1;
+  }
+  return inlineScale;
+}
+
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise((resolve, reject) => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy') ? resolve() : reject(new Error('copy failed'));
+    } catch (err) {
+      reject(err);
+    } finally {
+      document.body.removeChild(ta);
+    }
+  });
+}
+
+function shouldSkipDrag(e, wrap) {
+  if (e.target.classList && e.target.classList.contains('rh')) return true;
+  let t = e.target;
+  while (t && t !== wrap) {
+    if (t.isContentEditable || t.contentEditable === 'true') return true;
+    t = t.parentElement;
+  }
+  return false;
+}
+
+function pointerPoint(e) {
+  if (e.touches && e.touches[0]) return e.touches[0];
+  if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0];
+  return e;
+}
+
+function getCanvas() {
+  return isOverlay ? document.getElementById('canvasFull') : document.getElementById('canvas');
+}
+
+function setupInlineCanvas() {
+  const { W, H, VH } = getDims();
+  const viewport = document.getElementById('canvasViewport');
+  const scaled = document.getElementById('canvasScaled');
+  const inner = document.getElementById('canvas');
+  const vw = viewport.offsetWidth || 780;
+  inlineScale = vw / W;
+  const viewportH = Math.round(VH * inlineScale);
+
+  viewport.style.height = viewportH + 'px';
+  scaled.style.width = W + 'px';
+  scaled.style.height = H + 'px';
+  scaled.style.transform = `scale(${inlineScale})`;
+  scaled.style.transformOrigin = 'top left';
+  inner.style.width = W + 'px';
+  inner.style.height = H + 'px';
+
+  document.getElementById('scaleHint').textContent =
+    `1440 × 900px 首屏 · 缩放 ${Math.round(inlineScale * 100)}% · 可滚动查看完整页面`;
+}
+
+function setupOverlayCanvas() {
+  const { W, H, VH } = getDims();
+  const vw = window.innerWidth - 48;
+  const vh = window.innerHeight - 60;
+  const scale = Math.min(vw / W, (vh - 52) / VH);
+  const w = Math.round(W * scale);
+  const h = Math.round(VH * scale);
+
+  const inner = document.getElementById('overlayInner');
+  inner.style.width = (w + 2) + 'px';
+
+  const ovp = document.getElementById('overlayViewport');
+  ovp.style.width = w + 'px';
+  ovp.style.height = h + 'px';
+
+  const scaled = document.getElementById('overlayScaled');
+  scaled.style.width = W + 'px';
+  scaled.style.height = H + 'px';
+  scaled.style.transform = `scale(${scale})`;
+  scaled.style.transformOrigin = 'top left';
+
+  const cf = document.getElementById('canvasFull');
+  cf.style.width = W + 'px';
+  cf.style.height = H + 'px';
+  return scale;
+}
+
+function initScroll() {
+  const viewport = document.getElementById('canvasViewport');
+  const overlayVP = document.getElementById('overlayViewport');
+
+  viewport.addEventListener('wheel', e => {
+    const { H, VH } = getDims();
+    const maxScroll = H - VH;
+    if (maxScroll <= 0) return;
+    const atTop = scrollOffsetY <= 0 && e.deltaY < 0;
+    const atBottom = scrollOffsetY >= maxScroll && e.deltaY > 0;
+    if (atTop || atBottom) return;
+    e.preventDefault();
+    const scaled = document.getElementById('canvasScaled');
+    scrollOffsetY = Math.max(0, Math.min(maxScroll, scrollOffsetY + e.deltaY / inlineScale));
+    scaled.style.marginTop = `-${Math.round(scrollOffsetY * inlineScale)}px`;
+  }, { passive: false });
+
+  overlayVP.addEventListener('wheel', e => {
+    e.preventDefault();
+    const { H, VH } = getDims();
+    const scale = getScale();
+    scrollOffsetY = Math.max(0, Math.min(H - VH, scrollOffsetY + e.deltaY / scale));
+    document.getElementById('overlayScaled').style.marginTop = `-${Math.round(scrollOffsetY * scale)}px`;
+  }, { passive: false });
+}
+
+function openOverlay() {
+  document.getElementById('overlay').classList.add('open');
+  isOverlay = true;
+  const scale = setupOverlayCanvas();
+  document.getElementById('overlayScaled').style.marginTop = `-${Math.round(scrollOffsetY * scale)}px`;
+  const src = document.getElementById('canvas');
+  const dst = document.getElementById('canvasFull');
+  dst.innerHTML = src.innerHTML;
+  dst.querySelectorAll('.el').forEach(el => attachElEvents(el));
+  if (selectedEl) { selectedEl.classList.remove('sel'); selectedEl = null; }
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOverlay() {
+  const src = document.getElementById('canvasFull');
+  const dst = document.getElementById('canvas');
+  dst.innerHTML = src.innerHTML;
+  dst.querySelectorAll('.el').forEach(el => attachElEvents(el));
+  comps = [];
+  dst.querySelectorAll('.el').forEach(el => comps.push({ el, type: el.dataset.type }));
+  const scaled = document.getElementById('canvasScaled');
+  scaled.style.marginTop = `-${Math.round(scrollOffsetY * inlineScale)}px`;
+  if (selectedEl) { selectedEl.classList.remove('sel'); selectedEl = null; }
+  isOverlay = false;
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function addComp(type) {
+  const def = getCompDef(type);
+  if (!def) return;
+  const { W, H, VH } = getDims();
+  const canvas = getCanvas();
+  const wrap = document.createElement('div');
+  wrap.className = 'el';
+  wrap.dataset.type = type;
+
+  let x = Math.round((W - def.w) / 2);
+  let y = Math.round(scrollOffsetY + (VH - def.h) / 2) + Math.floor(Math.random() * 40 - 20);
+  if (type === 'nav') { x = 0; y = 0; }
+  if (type === 'footer') { x = 0; y = H - def.h; }
+  y = Math.max(0, Math.min(H - def.h, y));
+
+  wrap.style.cssText = `left:${x}px;top:${y}px;width:${def.w}px;height:${def.h}px;`;
+  wrap.innerHTML = makeCompHTML(type);
+
+  if (def.resizable) {
+    const rh = document.createElement('div');
+    rh.className = 'rh';
+    wrap.appendChild(rh);
+    const startResize = e => {
+      e.stopPropagation(); e.preventDefault();
+      selectEl(wrap);
+      const p = pointerPoint(e);
+      dragState = { mode: 'resize', el: wrap, startX: p.clientX, startY: p.clientY, origW: wrap.offsetWidth, origH: wrap.offsetHeight };
+    };
+    rh.addEventListener('mousedown', startResize);
+    rh.addEventListener('touchstart', startResize, { passive: false });
+  }
+
+  attachElEvents(wrap);
+  canvas.appendChild(wrap);
+  comps.push({ el: wrap, type });
+  selectEl(wrap);
+  updateEmptyState();
+}
+
+function attachElEvents(wrap) {
+  const startMove = e => {
+    if (shouldSkipDrag(e, wrap)) return;
+    e.preventDefault();
+    selectEl(wrap);
+    const p = pointerPoint(e);
+    dragState = { mode: 'move', el: wrap, startX: p.clientX, startY: p.clientY, origL: parseInt(wrap.style.left)||0, origT: parseInt(wrap.style.top)||0 };
+  };
+  wrap.addEventListener('mousedown', startMove);
+  wrap.addEventListener('touchstart', startMove, { passive: false });
+}
+
+function selectEl(el) {
+  if (selectedEl) selectedEl.classList.remove('sel');
+  selectedEl = el;
+  el.classList.add('sel');
+}
+
+function applyDrag(e) {
+  if (!dragState) return;
+  const scale = getScale();
+  const p = pointerPoint(e);
+  const dx = (p.clientX - dragState.startX) / scale;
+  const dy = (p.clientY - dragState.startY) / scale;
+
+  if (dragState.mode === 'move') {
+    const { W, H } = getDims();
+    const el = dragState.el;
+    el.style.left = Math.max(0, Math.min(W - el.offsetWidth, dragState.origL + dx)) + 'px';
+    el.style.top = Math.max(0, Math.min(H - el.offsetHeight, dragState.origT + dy)) + 'px';
+  } else if (dragState.mode === 'resize') {
+    const el = dragState.el;
+    el.style.width = Math.max(40, dragState.origW + dx) + 'px';
+    el.style.height = Math.max(20, dragState.origH + dy) + 'px';
+  }
+}
+
+function endDrag() { dragState = null; }
+
+document.addEventListener('mousemove', applyDrag);
+document.addEventListener('mouseup', endDrag);
+document.addEventListener('touchmove', e => { if (dragState) { e.preventDefault(); applyDrag(e); } }, { passive: false });
+document.addEventListener('touchend', endDrag);
+document.addEventListener('touchcancel', endDrag);
+
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Delete' || e.key === 'Backspace') && selectedEl) {
+    let t = document.activeElement;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable || t.contentEditable === 'true')) return;
+    selectedEl.remove();
+    comps = comps.filter(b => b.el !== selectedEl);
+    selectedEl = null;
+    updateEmptyState();
+  }
+});
+
+['canvas','canvasFull'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', e => {
+    if (e.target === e.currentTarget) {
+      if (selectedEl) selectedEl.classList.remove('sel');
+      selectedEl = null;
+    }
+  });
+});
+
+function clearCanvas() {
+  const canvas = getCanvas();
+  if (canvas) canvas.innerHTML = '';
+  if (!isOverlay) { comps = []; }
+  selectedEl = null;
+  updateEmptyState();
+}
+
+function pickStyle(n, name, desc) {
+  document.querySelectorAll('.scard').forEach(c => c.classList.remove('picked'));
+  document.getElementById('s' + n).classList.add('picked');
+  sel.style = name; sel.styleDesc = desc;
+}
+
+function describeLayout() {
+  const src = document.getElementById('canvas');
+  const items = src.querySelectorAll('.el');
+  if (!items.length) return null;
+  const c = {};
+  items.forEach(el => { const t = el.dataset.type; c[t] = (c[t]||0)+1; });
+  const labels = { nav:'导航栏', hero:'Hero区', card:'卡片', btn:'按钮', input:'输入框', text:'文字块', img:'图片', footer:'页脚' };
+  return Object.entries(c).map(([t,n]) => `${n}个${labels[t]||t}`).join('、');
+}
+
+function updateEmptyState() {
+  const empty = document.getElementById('canvasEmpty');
+  if (empty) empty.style.display = comps.length === 0 ? 'flex' : 'none';
+}
+
+function generatePrompt() {
+  if (!window.cachedPrompt) window.cachedPrompt = { claude: '', stitch: '' };
+
+  const { style, styleDesc } = sel;
+  const layout = describeLayout();
+  const font = fontMap[style] || 'Inter';
+  const userDesc = document.getElementById('userDesc').value.trim();
+  const designMdContent = document.getElementById('designMdInput').value.trim();
+
+  window.cachedPrompt.claude = [
+    `请为我设计一个高质量的 Web 页面 UI 视觉稿：`, ``,
+    userDesc ? `【产品描述】${userDesc}` : null,
+    `【平台】Web 桌面端（1440px 基准宽度）`,
+    styleDesc ? `【视觉风格】${styleDesc}` : null,
+    style ? `【风格名称】${style}` : null,
+    `【字体】${font}`,
+    layout ? `【页面结构】${layout}` : null,
+    designMdContent ? `\n【设计规范（DESIGN.md）】\n${designMdContent}` : null, ``,
+    `设计要求：`,
+    `- 视觉层次清晰，信息结构合理`,
+    `- 配色统一，符合风格定义`,
+    `- 交互状态完整（hover、active、disabled、focus）`,
+    `- 响应式适配桌面与平板视口`, ``,
+    `输出可用于开发交接的 Web 设计稿原型。`
+  ].filter(l => l !== null).join('\n');
+
+  window.cachedPrompt.stitch = [
+    `# DESIGN BRIEF`, ``,
+    userDesc ? `## Product\n${userDesc}` : null, ``,
+    `## Platform`, `Web (1440px desktop baseline)`, ``,
+    styleDesc ? `## Visual Style\n${styleDesc}` : null,
+    style ? `## Style Name\n${style}` : null, ``,
+    `## Typography`, `font-family: ${font}`, ``,
+    `## Layout`, layout || 'Free composition', ``,
+    designMdContent ? `## Design System (DESIGN.md)\n${designMdContent}` : null, ``,
+    `## Requirements`,
+    `- Clear visual hierarchy`,
+    `- Consistent color system`,
+    `- Complete interaction states (hover, active, disabled, focus)`,
+    `- Responsive for desktop and tablet viewports`, ``,
+    `## Output`,
+    `Production-ready Web design prototype for developer handoff.`
+  ].filter(l => l !== null).join('\n');
+
+  const box = document.getElementById('promptOut');
+  box.className = 'prompt-box';
+  box.textContent = window.cachedPrompt.claude;
+}
+
+function copyFor(target) {
+  generatePrompt();
+  const text = window.cachedPrompt[target];
+  if (!text) return;
+  document.getElementById('promptOut').textContent = target === 'stitch' ? window.cachedPrompt.stitch : window.cachedPrompt.claude;
+  copyText(text).then(() => {
+    const btn = document.getElementById(target === 'claude' ? 'btnClaude' : 'btnStitch');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ 已复制';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 1500);
+  }).catch(() => {
+    alert('复制失败，请手动复制下方文本');
+  });
+}
+
+let resizeRaf = 0;
+window.addEventListener('load', () => { renderStyleCards(); refreshToolbars(); setupInlineCanvas(); initScroll(); updateEmptyState(); });
+window.addEventListener('resize', () => {
+  cancelAnimationFrame(resizeRaf);
+  resizeRaf = requestAnimationFrame(setupInlineCanvas);
+});
+</script>
+</body>
+</html>
