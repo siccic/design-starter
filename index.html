@@ -1440,20 +1440,29 @@ function generatePrompt(showFeedback = true) {
   const font = sel.fontOverride || fontMap[style] || 'Inter';
   const userDesc = document.getElementById('userDesc').value.trim();
   const designMdContent = document.getElementById('designMdInput').value.trim();
+  const compositionGuardrail = style === 'Freeform Composition'
+    ? 'Use freeform composition primarily in the hero and expressive media areas. Keep navigation, forms, schedules, pricing, comparison content, and other task-focused sections on a structured grid.'
+    : 'Maintain the selected grid throughout the page while allowing one controlled visual focal point per viewport.';
 
   window.cachedPrompt.claude = [
     `Design a high-quality web interface:`, ``,
     userDesc ? `[Product brief] ${userDesc}` : null,
     `[Platform] Desktop web (1440px baseline)`,
     styleDesc ? `[Composition] ${style}: ${styleDesc}` : null,
+    `[Composition guardrail] ${compositionGuardrail}`,
     `[Typography] ${font}`,
     layout ? `[Page structure] ${layout}` : null,
     designMdContent ? `\n[Design system — DESIGN.md]\n${designMdContent}` : null, ``,
-    `[Rule priority] DESIGN.md governs colors, typography, radii, and component styling. Composition governs spatial organization only. Page structure defines modules and placement. If instructions conflict, DESIGN.md takes precedence.`, ``,
+    `[Rule priority] Accessibility, readability, and task completion take precedence over page structure. Page structure takes precedence over composition. Composition takes precedence over decorative styling. Within visual styling, DESIGN.md governs brand colors, typography, radii, and component treatments.`, ``,
     `Requirements:`,
     `- Clear visual hierarchy and information structure`,
     `- A consistent color system aligned with the selected direction`,
+    `- Keep the primary action recognizable and visible in the first viewport`,
+    `- Use one dominant visual gesture per viewport; do not maximize scale, color intensity, and irregular placement in every section`,
+    `- Keep body text at 16px or larger with readable line lengths; never overlap or clip functional content`,
+    `- Use familiar patterns for navigation, forms, schedules, pricing, and transactional actions`,
     `- Complete interaction states (hover, active, disabled, focus)`,
+    `- Reduce display scale, decorative offsets, and overlap intensity on narrower viewports`,
     `- Responsive behavior for desktop and tablet viewports`, ``,
     `Produce a web design prototype suitable for developer handoff.`
   ].filter(l => l !== null).join('\n');
@@ -1463,15 +1472,21 @@ function generatePrompt(showFeedback = true) {
     userDesc ? `## Product\n${userDesc}` : null, ``,
     `## Platform`, `Web (1440px desktop baseline)`, ``,
     styleDesc ? `## Composition\n${style}: ${styleDesc}` : null, ``,
+    `## Composition Guardrail`, compositionGuardrail, ``,
     `## Typography`, `font-family: ${font}`, ``,
     `## Page Skeleton`, layout || 'No modules specified', ``,
     designMdContent ? `## Design System (DESIGN.md)\n${designMdContent}` : null, ``,
     `## Rule Priority`,
-    `DESIGN.md governs colors, typography, radii, and component styling. Composition only governs spatial organization, while the page skeleton defines modules and placement. If any instruction conflicts, DESIGN.md takes precedence.`, ``,
+    `Accessibility, readability, and task completion take precedence over page structure. Page structure takes precedence over composition. Composition takes precedence over decorative styling. Within visual styling, DESIGN.md governs brand colors, typography, radii, and component treatments.`, ``,
     `## Requirements`,
     `- Clear visual hierarchy`,
     `- Consistent color system`,
+    `- Primary action recognizable and visible in the first viewport`,
+    `- One dominant visual gesture per viewport`,
+    `- Body text 16px or larger; no overlap or clipping of functional content`,
+    `- Familiar patterns for navigation, forms, schedules, pricing, and transactional actions`,
     `- Complete interaction states (hover, active, disabled, focus)`,
+    `- Reduce display scale, decorative offsets, and overlap intensity on narrower viewports`,
     `- Responsive for desktop and tablet viewports`, ``,
     `## Output`,
     `Production-ready Web design prototype for developer handoff.`
