@@ -807,6 +807,20 @@ main { max-width: 1088px; padding-top: 88px; }
   section[id] { scroll-margin-top: 72px; }
 }
 
+
+.structure-policy { display: flex; align-items: center; gap: 16px; padding: 18px 20px; margin: 0 0 20px; background: #fff; border: 1px solid #e8ebee; border-radius: 16px; }
+.structure-policy[data-mode="locked"] { background: #f3f8fc; border-color: #d7e6f0; }
+.structure-policy-icon { width: 38px; height: 38px; border-radius: 12px; background: #f5f5f7; display: grid; place-items: center; flex-shrink: 0; }
+.structure-policy[data-mode="locked"] .structure-policy-icon { background: #e7f1f8; color: #417fa4; }
+.structure-policy-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.structure-policy-source { font-size: 11px; color: #86868b; margin-bottom: 4px; }
+.structure-policy-title { font-size: 14px; font-weight: 600; }
+.structure-policy-copy { font-size: 13px; line-height: 1.5; color: #6e6e73; margin-top: 4px; }
+.structure-policy-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.structure-policy-tags span { font-size: 11px; border-radius: 999px; padding: 4px 9px; border: 1px solid #e1e6eb; background: #fff; color: #60606c; }
+@media(max-width:640px) { .structure-policy { align-items: flex-start; padding: 16px; gap: 12px; } }
+
+
 </style>
 </head>
 <body>
@@ -820,7 +834,7 @@ main { max-width: 1088px; padding-top: 88px; }
   </header>
 
   <h1 class="hero-h1">From an idea,<br>to a clear <span class="hero-glow">starting point</span></h1>
-  <p class="hero-sub">Choose a composition, sketch the page structure, and get a focused design instruction in <b>one minute</b>—ready for <b>Claude Design</b> or <b>Stitch</b>.</p>
+  <p class="hero-sub">Map your idea, composition preference, and page structure into clear project context in <b>one minute</b>—ready for <b>Claude Design</b> or <b>Stitch</b>.</p>
   <a class="pill-primary" href="#step1">Start building <svg viewBox="0 0 24 24"><path d="M12 4.5v15M5.5 13l6.5 6.5 6.5-6.5"/></svg></a>
 
   <div class="hero-art" aria-hidden="true">
@@ -829,8 +843,8 @@ main { max-width: 1088px; padding-top: 88px; }
       <div class="doc-text">A simple SaaS landing page for indie developers, with a hero and three feature cards…</div>
     </div>
     <div class="doc doc-after">
-      <span class="doc-tag"><svg viewBox="0 0 24 24"><path d="M19.5 6.5l-11 11-5-5"/></svg>Instruction</span>
-      <div class="doc-text"><b>Design a high-quality web interface:</b><br>[Product] SaaS landing page for indie developers<br>[Platform] Desktop web (1440px)<br>[Composition] Structured grid<br>[Page structure] 1 navigation, 1 hero, 3 cards…</div>
+      <span class="doc-tag"><svg viewBox="0 0 24 24"><path d="M19.5 6.5l-11 11-5-5"/></svg>Project context</span>
+      <div class="doc-text"><b>Structured project context:</b><br>[Product] SaaS landing page for indie developers<br>[Platform] Desktop web (1440px)<br>[Composition preference] Structured grid<br>[Module inventory] 1 navigation, 1 hero, 3 cards…</div>
     </div>
   </div>
 </div>
@@ -841,7 +855,7 @@ main { max-width: 1088px; padding-top: 88px; }
     <div class="journey-links">
       <a class="journey-link active" href="#step1" data-step="step1" data-index="01" aria-current="step">Composition</a>
       <a class="journey-link" href="#step2" data-step="step2" data-index="02">Structure</a>
-      <a class="journey-link" href="#step3" data-step="step3" data-index="03">Instruction</a>
+      <a class="journey-link" href="#step3" data-step="step3" data-index="03">Context</a>
     </div>
     <a class="journey-action" href="#step3">Generate</a>
   </nav>
@@ -849,8 +863,8 @@ main { max-width: 1088px; padding-top: 88px; }
 
 <main>
 
-<h2 class="sec-title">Three steps from idea to direction.</h2>
-<p class="sec-sub">Set the direction before writing a long specification.</p>
+<h2 class="sec-title">Three steps from idea to shared context.</h2>
+<p class="sec-sub">Make the starting information clear without designing the final website for the model.</p>
 
 <!-- step 1 -->
 <section class="step" id="step1">
@@ -858,7 +872,7 @@ main { max-width: 1088px; padding-top: 88px; }
     <div class="step-num">1</div>
     <div>
       <div class="step-title">Choose a composition</div>
-      <div class="step-desc">Define the page’s spatial order: use a tightly aligned grid, or allow offsets, overlaps, and asymmetry.</div>
+      <div class="step-desc">Structured Grid locks the canvas’s relative positions. Freeform Composition passes only the modules and content, leaving placement to the model.</div>
     </div>
   </div>
   <div class="style-grid" id="styleGrid"></div>
@@ -869,17 +883,26 @@ main { max-width: 1088px; padding-top: 88px; }
   <div class="step-head">
     <div class="step-num">2</div>
     <div>
-      <div class="step-title">Build the page structure</div>
-      <div class="step-desc">Add navigation, a hero, cards, and other modules, then adjust their position and size. <b>It does not need to be precise</b>—it only needs to show what belongs on the page and where.</div>
+      <div class="step-title" id="structureTitle">Build the page structure</div>
+      <div class="step-desc" id="structureDescription">Add modules, then drag and resize them on the canvas. Step 1 determines whether the model must preserve these position relationships.</div>
     </div>
     <div class="step-actions">
-      <button class="expand-btn" onclick="openOverlay()">
+      <button class="expand-btn" id="expandCanvasButton" onclick="openOverlay()">
         <svg viewBox="0 0 24 24"><path d="M15 4h5v5M9 20H4v-5M20 4l-6 6M4 20l6-6"/></svg>
         Expand canvas
       </button>
     </div>
   </div>
   <div class="canvas-toolbar" id="mainToolbar"></div>
+  <div class="structure-policy" id="structurePolicy" role="status" aria-live="polite" data-mode="unselected">
+    <div class="structure-policy-icon" id="structurePolicyIcon" aria-hidden="true"></div>
+    <div>
+      <div class="structure-policy-source">Linked to your selection in step 1</div>
+      <div class="structure-policy-title" id="structurePolicyTitle">Choose a layout mode first</div>
+      <div class="structure-policy-copy" id="structurePolicyCopy">The same canvas supports both modes. Your choice determines how its positions are passed to the model.</div>
+      <div class="structure-policy-tags"><span>Modules + content included</span><span id="structurePolicyPosition">Position policy not selected</span></div>
+    </div>
+  </div>
   <div class="canvas-viewport" id="canvasViewport">
     <div class="canvas-scaled" id="canvasScaled">
       <div id="canvas"></div>
@@ -908,8 +931,8 @@ main { max-width: 1088px; padding-top: 88px; }
   <div class="step-head">
     <div class="step-num">3</div>
     <div>
-      <div class="step-title">Generate a design instruction</div>
-      <div class="step-desc">Describe what you want in one sentence. Add a <b>DESIGN.md</b> file to include your visual rules in the instruction.</div>
+      <div class="step-title">Generate project context</div>
+      <div class="step-desc">Describe what you want in one sentence. Add a <b>DESIGN.md</b> file as source material. Design Start maps what you provide without inventing the visual solution.</div>
     </div>
   </div>
   <div class="field">
@@ -927,7 +950,7 @@ main { max-width: 1088px; padding-top: 88px; }
   </div>
   <div class="prompt-box empty" id="promptOut"></div>
   <div class="action-row">
-    <button class="gen-btn" onclick="generatePrompt()">Generate instruction</button>
+    <button class="gen-btn" onclick="generatePrompt()">Generate context</button>
     <div class="copy-btns">
       <button class="copy-btn" id="btnClaude" onclick="copyFor('claude')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="13" height="13" rx="2.5"/><path d="M16 8V5.5A2.5 2.5 0 0013.5 3h-8A2.5 2.5 0 003 5.5v8A2.5 2.5 0 005.5 16H8"/></svg>
@@ -945,7 +968,7 @@ main { max-width: 1088px; padding-top: 88px; }
 
 <footer id="pageFooter">
   <div class="foot-brand"><span class="brand-mark" aria-label="Design Start"><svg viewBox="0 0 24 24"><defs><linearGradient id="logoGlassFooter" x1="4" y1="4" x2="20" y2="20"><stop stop-color="#eaffff" stop-opacity=".92"/><stop offset=".55" stop-color="#d9edff" stop-opacity=".56"/><stop offset="1" stop-color="#ffffff" stop-opacity=".92"/></linearGradient></defs><path d="M6.2 5.2c-.8-.3-1.6.4-1.3 1.3l3.4 11.4c.3 1 1.6 1.2 2.2.3l2.2-3.7 4.4-2.2c1-.5 1-1.9 0-2.3L6.2 5.2z" fill="url(#logoGlassFooter)" stroke="rgba(255,255,255,.9)" stroke-width="1.05" stroke-linejoin="round"/></svg></span>Design Start</div>
-  <div class="foot-meta">Turn an idea into a focused design instruction</div>
+  <div class="foot-meta">Turn an idea into clear project context</div>
 </footer>
 
 <script>
@@ -953,51 +976,34 @@ const CANVAS = { W: 1440, H: 2700, VH: 900 };
 
 function getDims() { return CANVAS; }
 
-const sel = { style: null, styleDesc: null, designPreset: null, fontOverride: null };
+const sel = { style: null, styleDesc: null, designPreset: null };
 
 const designPresets = [
   {
     id: 'figma-marketing',
     label: 'Figma Marketing',
-    path: 'presets/figma-marketing.md',
-    font: 'Inter / JetBrains Mono (substitutes for figmaSans / figmaMono)',
-    styleN: 1,
-    styleHint: 'Monochrome framework with full-width pastel storytelling, grid alignment, pill CTAs, and editorial typography'
+    path: 'presets/figma-marketing.md'
   },
   {
     id: 'mobbin',
     label: 'Mobbin',
-    path: 'presets/mobbin.md',
-    font: 'Inter (Saans substitute; headings 650 / body 450 / subtitles 300)',
-    styleN: 1,
-    styleHint: 'Gallery-white monochrome system, pill interactions, shadow-free neutral layering, content-led color, and electric blue reserved for commercial signals'
+    path: 'presets/mobbin.md'
   },
   {
     id: 'xai',
     label: 'xAI',
-    path: 'presets/xai.md',
-    font: 'Inter 400 (Universal Sans substitute with negative display tracking) / Geist Mono uppercase eyebrows',
-    styleN: 1,
-    styleHint: 'Near-black canvas, white outline pills as the sole interaction shape, weight-400 displays with strong negative tracking, mono uppercase eyebrows, and hairline depth'
+    path: 'presets/xai.md'
   },
   {
     id: 'letters',
     label: 'Letters',
-    path: 'presets/letters.md',
-    font: 'Inter Tight (Open Runde substitute; -0.04em display tracking) / Inter UI text',
-    styleN: 1,
-    styleHint: 'Sky-gradient hero with a white clinical workspace, near-black pill CTAs, 18px cards with broad low-opacity blue shadows, surgical blue reserved for icons, and centered headings'
+    path: 'presets/letters.md'
   }
 ];
 let comps = [], selectedEl = null, dragState = null;
 let isOverlay = false;
 let inlineScale = 1;
 let scrollOffsetY = 0;
-
-const fontMap = {
-  'Structured Grid': 'Inter',
-  'Freeform Composition': 'Space Grotesk'
-};
 
 const compDefs = {
   nav:    { w: 1440, h: 72,  resizable: false },
@@ -1055,23 +1061,20 @@ async function loadDesignPreset(id) {
     return;
   }
   sel.designPreset = id;
-  sel.fontOverride = preset.font;
-  if (preset.styleN) pickStyle(preset.styleN, 'Structured Grid', preset.styleHint || 'Use a structured grid with explicit alignment, steady rhythm, and a clear information hierarchy', true);
   renderPresetChips();
 }
 
 function clearDesignPreset() {
   document.getElementById('designMdInput').value = '';
   sel.designPreset = null;
-  sel.fontOverride = null;
   renderPresetChips();
 }
 
 function renderStyleCards() {
   const grid = document.getElementById('styleGrid');
   const styles = [
-    { n: 1, name: 'Structured Grid', desc: 'Use a structured grid with explicit alignment, steady rhythm, and a clear information hierarchy', label: 'Strict alignment · Stable order', img: 'assets/style-grid-bento.jpg', ref: 'Nev Flynn' },
-    { n: 2, name: 'Freeform Composition', desc: 'Allow offsets, overlaps, and asymmetrical placement to create stronger visual tension', label: 'Offset layers · Asymmetric flow', img: 'assets/style-free-editorial.jpg', ref: 'Keny Zachelin' },
+    { n: 1, name: 'Structured Grid', desc: 'Preserve the relative positions shown on the canvas; exact measurements can adapt responsively', label: 'Positions locked · Model follows your layout', img: 'assets/style-grid-bento.jpg', ref: 'Nev Flynn' },
+    { n: 2, name: 'Freeform Composition', desc: 'Use the canvas as a module and content inventory; let the model determine placement', label: 'Positions unlocked · Model arranges the layout', img: 'assets/style-free-editorial.jpg', ref: 'Keny Zachelin' },
   ];
   grid.innerHTML = styles.map(s => `
     <div class="scard ${sel.style === s.name ? 'picked' : ''}" id="s${s.n}" onclick="pickStyle(${s.n},'${s.name}','${s.desc}')">
@@ -1402,26 +1405,109 @@ function clearCanvas() {
   updateEmptyState();
 }
 
-function pickStyle(n, name, desc, keepFontOverride) {
+function pickStyle(n, name, desc) {
   document.querySelectorAll('.scard').forEach(c => c.classList.remove('picked'));
   document.getElementById('s' + n).classList.add('picked');
   sel.style = name; sel.styleDesc = desc;
-  if (!keepFontOverride) sel.fontOverride = null;
+  updateStructureMode();
 }
 
 function describeLayout() {
   const src = document.getElementById('canvas');
-  const items = src.querySelectorAll('.el');
-  if (!items.length) return null;
+  const nodes = [...src.querySelectorAll('.el')];
+  if (!nodes.length) return null;
+  const { W, H } = getDims();
   const c = {};
-  items.forEach(el => { const t = el.dataset.type; c[t] = (c[t]||0)+1; });
   const labels = { nav:'navigation', hero:'hero', card:'card', btn:'button', input:'input', text:'text block', img:'image', footer:'footer' };
-  return Object.entries(c).map(([t,n]) => `${n} ${labels[t]||t}${n === 1 ? '' : 's'}`).join(', ');
+  const defaults = new Set([
+    'Logo', 'Home', 'Product', 'About', 'Get started', 'Product tagline',
+    'Write your product headline here', 'Describe the product’s core value in one concise supporting sentence.',
+    'Card title', 'Add a short description of this feature or piece of content.', 'Button label',
+    'Field label', 'Enter a value…', 'Section heading',
+    'Add supporting copy across one or more lines. Describe a feature, value proposition, or other useful information.',
+    'Brand', 'Privacy', 'Terms', 'Contact', '© 2026'
+  ]);
+
+  const items = nodes.map(el => {
+    const type = el.dataset.type;
+    c[type] = (c[type] || 0) + 1;
+    const left = parseFloat(el.style.left) || 0;
+    const top = parseFloat(el.style.top) || 0;
+    const width = parseFloat(el.style.width) || el.offsetWidth || 0;
+    const height = parseFloat(el.style.height) || el.offsetHeight || 0;
+    const editedText = [...el.querySelectorAll('[contenteditable="true"]')]
+      .map(node => node.innerText.replace(/\s+/g, ' ').trim())
+      .filter(text => text && !defaults.has(text));
+    return { el, type, left, top, width, height, editedText };
+  }).sort((a, b) => a.top - b.top || a.left - b.left);
+
+  const seen = {};
+  items.forEach(item => {
+    seen[item.type] = (seen[item.type] || 0) + 1;
+    item.name = `${labels[item.type] || item.type}${c[item.type] > 1 ? ` ${seen[item.type]}` : ''}`;
+  });
+
+  const widthPhrase = width => width >= W * .85 ? 'full width' : width >= W * .58 ? 'wide' : width >= W * .38 ? 'about half width' : width >= W * .2 ? 'narrow' : 'compact';
+  const xPhrase = (left, width) => {
+    const center = left + width / 2;
+    return center < W / 3 ? 'left' : center > W * 2 / 3 ? 'right' : 'center';
+  };
+  const yPhrase = (top, height) => {
+    const center = top + height / 2;
+    return center < H * .18 ? 'top' : center < H * .42 ? 'upper section' : center < H * .68 ? 'middle section' : center < H * .9 ? 'lower section' : 'bottom';
+  };
+  const overlaps = (a, b) => Math.min(a.left + a.width, b.left + b.width) > Math.max(a.left, b.left) && Math.min(a.top + a.height, b.top + b.height) > Math.max(a.top, b.top);
+
+  const spatial = items.map((item, index) => {
+    const notes = [`${widthPhrase(item.width)}`, `${xPhrase(item.left, item.width)} of the ${yPhrase(item.top, item.height)}`];
+    const previous = items.slice(0, index);
+    const overlap = previous.find(other => overlaps(item, other));
+    if (overlap) notes.push(`overlapping ${overlap.name}`);
+    else {
+      const sameRow = [...previous].reverse().find(other => Math.abs((other.top + other.height / 2) - (item.top + item.height / 2)) < Math.max(80, Math.min(other.height, item.height) * .35));
+      if (sameRow) notes.push(`in the same row as ${sameRow.name}, to its ${item.left >= sameRow.left ? 'right' : 'left'}`);
+    }
+    return `- ${item.name}: ${notes.join('; ')} (approximately x ${Math.round(item.left / W * 100)}%, y ${Math.round(item.top / H * 100)}%, width ${Math.round(item.width / W * 100)}%)`;
+  }).join('\n');
+
+  const content = items
+    .filter(item => item.editedText.length)
+    .map(item => `- ${item.name}: ${item.editedText.join(' / ')}`)
+    .join('\n');
+
+  return {
+    inventory: Object.entries(c).map(([t,n]) => `${n} ${labels[t]||t}${n === 1 ? '' : 's'}`).join(', '),
+    spatial,
+    content
+  };
+}
+
+function updateStructureMode() {
+  const locked = sel.style === 'Structured Grid';
+  const selected = Boolean(sel.style);
+  document.getElementById('structureTitle').textContent = 'Build the page structure';
+  document.getElementById('structureDescription').textContent = 'Add modules, then drag and resize them on the canvas. Your selection in step 1 determines how the model uses this layout.';
+  document.getElementById('structurePolicy').dataset.mode = selected ? (locked ? 'locked' : 'unlocked') : 'unselected';
+  document.getElementById('structurePolicyTitle').textContent = !selected
+    ? 'Choose a layout mode first'
+    : locked ? 'Structured Grid → Positions locked' : 'Freeform Composition → Positions unlocked';
+  document.getElementById('structurePolicyCopy').textContent = !selected
+    ? 'The same canvas supports both modes. Your choice determines how its positions are passed to the model.'
+    : locked
+      ? 'The model receives your canvas relationships and preserves what sits beside, above, below, or overlaps another module. You can still drag and resize freely.'
+      : 'The model receives the modules and edited content, without canvas coordinates or spatial relationships. It decides where each module belongs.';
+  document.getElementById('structurePolicyPosition').textContent = !selected
+    ? 'Position policy not selected'
+    : locked ? 'Spatial relationships included' : 'Spatial relationships omitted';
+  document.getElementById('structurePolicyIcon').innerHTML = '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/>' + (locked
+    ? '<path d="M8 10V7a4 4 0 018 0v3M12 14v3"/>'
+    : '<path d="M8 10V7a4 4 0 017-2M12 14v3"/>') + '</svg>';
 }
 
 function updateEmptyState() {
   const empty = document.getElementById('canvasEmpty');
   if (empty) empty.style.display = comps.length === 0 ? 'flex' : 'none';
+  updateStructureMode();
 }
 
 function generatePrompt(showFeedback = true) {
@@ -1437,59 +1523,40 @@ function generatePrompt(showFeedback = true) {
 
   const { style, styleDesc } = sel;
   const layout = describeLayout();
-  const font = sel.fontOverride || fontMap[style] || 'Inter';
   const userDesc = document.getElementById('userDesc').value.trim();
   const designMdContent = document.getElementById('designMdInput').value.trim();
-  const compositionGuardrail = style === 'Freeform Composition'
-    ? 'Use freeform composition primarily in the hero and expressive media areas. Keep navigation, forms, schedules, pricing, comparison content, and other task-focused sections on a structured grid.'
-    : 'Maintain the selected grid throughout the page while allowing one controlled visual focal point per viewport.';
+  const positionLocked = style === 'Structured Grid';
+  const placementPolicy = positionLocked
+    ? 'Locked relative positions: preserve the canvas’s grouping, order, left/right, above/below, and overlap relationships. Adapt exact spacing and sizes responsively. Visual styling and unspecified interaction details are yours to design.'
+    : 'Unlocked positions: use the canvas only as a module and content inventory. Determine grouping, order, placement, spacing, and sizes based on the product. Visual styling and unspecified interaction details are yours to design.';
 
   window.cachedPrompt.claude = [
-    `Design a high-quality web interface:`, ``,
+    `Use the following as structured project context for a web design task.`,
+    `It maps the user's inputs and is not a prescribed visual solution. Make the final design decisions based on the product, content, medium, and any supplied design system.`, ``,
     userDesc ? `[Product brief] ${userDesc}` : null,
     `[Platform] Desktop web (1440px baseline)`,
-    styleDesc ? `[Composition] ${style}: ${styleDesc}` : null,
-    `[Composition guardrail] ${compositionGuardrail}`,
-    `[Typography] ${font}`,
-    layout ? `[Page structure] ${layout}` : null,
-    designMdContent ? `\n[Design system — DESIGN.md]\n${designMdContent}` : null, ``,
-    `[Rule priority] Accessibility, readability, and task completion take precedence over page structure. Page structure takes precedence over composition. Composition takes precedence over decorative styling. Within visual styling, DESIGN.md governs brand colors, typography, radii, and component treatments.`, ``,
-    `Requirements:`,
-    `- Clear visual hierarchy and information structure`,
-    `- A consistent color system aligned with the selected direction`,
-    `- Keep the primary action recognizable and visible in the first viewport`,
-    `- Use one dominant visual gesture per viewport; do not maximize scale, color intensity, and irregular placement in every section`,
-    `- Keep body text at 16px or larger with readable line lengths; never overlap or clip functional content`,
-    `- Use familiar patterns for navigation, forms, schedules, pricing, and transactional actions`,
-    `- Complete interaction states (hover, active, disabled, focus)`,
-    `- Reduce display scale, decorative offsets, and overlap intensity on narrower viewports`,
-    `- Responsive behavior for desktop and tablet viewports`, ``,
-    `Produce a web design prototype suitable for developer handoff.`
+    style ? `[Layout mode] ${style}` : null,
+    `[Placement policy] ${placementPolicy}`,
+    layout ? `[Module inventory] ${layout.inventory}` : null,
+    layout && positionLocked ? `[Spatial map from the user's canvas]\n${layout.spatial}` : null,
+    layout && layout.content ? `[Edited content labels]\n${layout.content}` : null,
+    designMdContent ? `\n[Provided design reference — DESIGN.md]\n${designMdContent}` : null, ``,
+    `[Scope] This is a rough communication sketch, not a prescribed visual design. Unspecified details are yours to design; do not present those decisions as user requirements.`
   ].filter(l => l !== null).join('\n');
 
   window.cachedPrompt.stitch = [
-    `# DESIGN BRIEF`, ``,
+    `# PROJECT CONTEXT`, ``,
+    `This document maps the user's inputs. It is not a prescribed visual solution. Make the final design decisions based on the product, content, medium, and any supplied design system.`, ``,
     userDesc ? `## Product\n${userDesc}` : null, ``,
     `## Platform`, `Web (1440px desktop baseline)`, ``,
-    styleDesc ? `## Composition\n${style}: ${styleDesc}` : null, ``,
-    `## Composition Guardrail`, compositionGuardrail, ``,
-    `## Typography`, `font-family: ${font}`, ``,
-    `## Page Skeleton`, layout || 'No modules specified', ``,
-    designMdContent ? `## Design System (DESIGN.md)\n${designMdContent}` : null, ``,
-    `## Rule Priority`,
-    `Accessibility, readability, and task completion take precedence over page structure. Page structure takes precedence over composition. Composition takes precedence over decorative styling. Within visual styling, DESIGN.md governs brand colors, typography, radii, and component treatments.`, ``,
-    `## Requirements`,
-    `- Clear visual hierarchy`,
-    `- Consistent color system`,
-    `- Primary action recognizable and visible in the first viewport`,
-    `- One dominant visual gesture per viewport`,
-    `- Body text 16px or larger; no overlap or clipping of functional content`,
-    `- Familiar patterns for navigation, forms, schedules, pricing, and transactional actions`,
-    `- Complete interaction states (hover, active, disabled, focus)`,
-    `- Reduce display scale, decorative offsets, and overlap intensity on narrower viewports`,
-    `- Responsive for desktop and tablet viewports`, ``,
-    `## Output`,
-    `Production-ready Web design prototype for developer handoff.`
+    style ? `## Layout Mode\n${style}` : null, ``,
+    `## Placement Policy`, placementPolicy, ``,
+    `## Module Inventory`, layout ? layout.inventory : 'No modules specified', ``,
+    layout && positionLocked ? `## Spatial Map from the User's Canvas\n${layout.spatial}` : null, ``,
+    layout && layout.content ? `## Edited Content Labels\n${layout.content}` : null, ``,
+    designMdContent ? `## Provided Design Reference (DESIGN.md)\n${designMdContent}` : null, ``,
+    `## Scope`,
+    `This is a rough communication sketch, not a prescribed visual design. Unspecified details are yours to design; do not present those decisions as user requirements.`
   ].filter(l => l !== null).join('\n');
 
   const box = document.getElementById('promptOut');
@@ -1500,7 +1567,7 @@ function generatePrompt(showFeedback = true) {
   box.addEventListener('animationend', () => box.classList.remove('is-revealing'), { once: true });
   if (showFeedback && genButton) {
     setTimeout(() => {
-      genButton.textContent = genButton.dataset.label || 'Generate instruction';
+      genButton.textContent = genButton.dataset.label || 'Generate context';
       genButton.classList.remove('is-generating');
       genButton.disabled = false;
     }, 560);
