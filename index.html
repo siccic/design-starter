@@ -4,11 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Design Starter · Web (v3)</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet"></noscript>
+<link rel="preload" href="assets/fonts/inter-latin-variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/hero-sky-grain.webp" as="image" fetchpriority="high">
 <style>
+#overlayInner { max-height: calc(100dvh - 32px); display: flex; flex-direction: column; }
+#overlayToolbar { flex-shrink: 0; }
+#overlayToolbar .overlay-close { order: -1; }
+#overlayViewport { min-height: 0; flex-shrink: 1; overscroll-behavior: contain; scrollbar-width: thin; }
+#overlay #selectionEditor { flex-shrink: 0; margin: 0 !important; }
+@media (max-width: 767px) {
+  #overlayViewport { overflow: auto !important; }
+  #overlayToolbar { max-height: 140px; }
+}
+
+#selectionEditor input { width: 76px; padding: 8px; border: 1px solid var(--line-strong); border-radius: 8px; font: inherit; }
+#selectionEditor { padding: 12px; max-height: 210px; overflow: auto; }
+#selectionText { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+#selectionText label { flex: 1 1 180px; }
+#selectionText textarea { display: block; width: 100%; font: inherit; font-size: 16px; padding: 8px; border: 1px solid var(--line-strong); border-radius: 8px; }
+
+.scard { text-align: left; font: inherit; color: inherit; }
+.image-dropzone:focus-visible, .el:focus-visible { outline: 2px solid #141414; outline-offset: 3px; }
+.overlay-viewport { overflow-x: auto !important; }
+@media (max-width: 767px) {
+  .text-input.mono { font-size: 16px !important; }
+  .overlay-toolbar { flex-wrap: wrap; max-height: 190px; overflow-y: auto; }
+}
+
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400 700; font-display: swap; src: url('assets/fonts/inter-latin-variable.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('assets/fonts/jetbrains-mono-latin.woff2') format('woff2'); }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 /* Redesigned against letters.app (not the DESIGN.md): the hero is an inset rounded sky card with a
    product illustration, the tool is three numbered feature cards on #fafafa, actions are obsidian pills,
@@ -20,12 +44,12 @@
   --cloud:     #f5f5f5;
   --sky-tint:  #d7e6f5;
   --charcoal:  #60606c;
-  --slate:     #8b8b8b;
+  --slate:     #666671;
   --ink:       #151515;
   --blue:      #2597d0;
   --line:      #e6e6ea;
   --line-strong: #bebecc;
-  --sky: linear-gradient(180deg, rgba(255,255,255,.02) 0%, rgba(152,210,255,.08) 100%), url('assets/hero-sky-grain.jpg?v=1') center / cover no-repeat;
+  --sky: linear-gradient(180deg, rgba(255,255,255,.02) 0%, rgba(152,210,255,.08) 100%), url('assets/hero-sky-grain.webp') center / cover no-repeat;
   --display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --hand: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -660,7 +684,7 @@ footer { margin-top: 64px; }
 
 .el { transition: transform 180ms var(--ease-signature), filter 180ms var(--ease-signature); }
 .el.is-entering { animation: component-enter var(--motion-standard) var(--ease-emphasized) both; }
-.el.is-dragging { cursor: grabbing; transform: scale(1.01); filter: drop-shadow(0 18px 30px rgba(20,36,56,.14)); transition-duration: var(--motion-quick); }
+.el.is-dragging { cursor: grabbing; transform: none; filter: drop-shadow(0 18px 30px rgba(20,36,56,.14)); transition-duration: var(--motion-quick); }
 .el.is-settling { transform: scale(1); filter: drop-shadow(0 8px 18px rgba(20,36,56,.06)); }
 
 .prompt-box.is-revealing { animation: prompt-reveal var(--motion-standard) var(--ease-emphasized) both; }
@@ -934,7 +958,16 @@ main { max-width: 1088px; padding-top: 88px; }
       <div class="structure-policy-tags"><span>Modules + content included</span><span id="structurePolicyPosition">Position policy not selected</span></div>
     </div>
   </div>
-  <div class="canvas-viewport" id="canvasViewport">
+  <fieldset id="selectionEditor" hidden style="border:0;margin:12px 0">
+<legend>Selected module</legend>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<label>X <input aria-label="Module X" type="number" data-geometry="left" min="0"></label>
+<label>Y <input aria-label="Module Y" type="number" data-geometry="top" min="0"></label>
+<label>Width <input aria-label="Module width" type="number" data-geometry="width" min="40"></label>
+<label>Height <input aria-label="Module height" type="number" data-geometry="height" min="20"></label>
+</div><div id="selectionText"></div>
+</fieldset>
+<div class="canvas-viewport" id="canvasViewport">
     <div class="canvas-scaled" id="canvasScaled">
       <div id="canvas"></div>
     </div>
@@ -946,7 +979,7 @@ main { max-width: 1088px; padding-top: 88px; }
   <div class="canvas-hint" id="scaleHint"></div>
 </section>
 
-<div class="canvas-overlay" id="overlay">
+<div class="canvas-overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Page structure editor">
   <div class="canvas-overlay-inner" id="overlayInner">
     <div class="overlay-toolbar" id="overlayToolbar"></div>
     <div class="overlay-viewport" id="overlayViewport">
@@ -968,20 +1001,20 @@ main { max-width: 1088px; padding-top: 88px; }
   </div>
   <div class="field">
     <div class="field-row">
-      <div class="field-label"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 013 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg>Product brief</div>
+      <label for="userDesc" class="field-label"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 013 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg>Product brief</label>
     </div>
     <textarea id="userDesc" class="text-input" rows="3" placeholder="For example: A SaaS landing page for indie developers"></textarea>
   </div>
   <div class="field">
     <div class="field-row">
-      <div class="field-label"><svg viewBox="0 0 24 24"><path d="M14 3H6.5A2.5 2.5 0 004 5.5v13A2.5 2.5 0 006.5 21h11a2.5 2.5 0 002.5-2.5V9z"/><path d="M14 3v6h6M8 13.5h8M8 17h5"/></svg>DESIGN.md <small>Optional</small></div>
+      <label for="designMdInput" class="field-label"><svg viewBox="0 0 24 24"><path d="M14 3H6.5A2.5 2.5 0 004 5.5v13A2.5 2.5 0 006.5 21h11a2.5 2.5 0 002.5-2.5V9z"/><path d="M14 3v6h6M8 13.5h8M8 17h5"/></svg>DESIGN.md <small>Optional</small></label>
       <a href="https://getdesign.md/" target="_blank" rel="noopener noreferrer" class="pill-ghost">Get DESIGN.md <svg viewBox="0 0 24 24"><path d="M7 17L17 7M8.5 7H17v8.5"/></svg></a>
     </div>
     <textarea id="designMdInput" class="text-input mono" rows="4" placeholder="Paste your DESIGN.md content here."></textarea>
   </div>
-  <div class="prompt-box empty" id="promptOut"></div>
+  <p id="exportStatus" role="status" class="canvas-hint"></p><p class="canvas-hint">Copy the brief into your design tool. Attach uploaded images separately.</p><div class="prompt-box empty" id="promptOut"></div>
   <div class="action-row">
-    <button class="gen-btn" onclick="generatePrompt()">Generate context</button>
+    <button class="gen-btn" onclick="generatePrompt()">Build brief</button>
     <div class="copy-btns">
       <button class="copy-btn" id="btnClaude" onclick="copyFor('claude')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="13" height="13" rx="2.5"/><path d="M16 8V5.5A2.5 2.5 0 0013.5 3h-8A2.5 2.5 0 003 5.5v8A2.5 2.5 0 005.5 16H8"/></svg>
@@ -1033,6 +1066,43 @@ const designPresets = [
 ];
 let comps = [], selectedEl = null, dragState = null;
 let isOverlay = false;
+let overlayReturnFocus = null;
+const undoHistory = [];
+function saveUndo() {
+  undoHistory.push([...getCanvas().children].map(el => ({ el, style: el.style.cssText })));
+  if (undoHistory.length > 50) undoHistory.shift();
+}
+function undoCanvas() {
+  const state = undoHistory.pop();
+  if (!state) return;
+  const canvas = getCanvas();
+  canvas.replaceChildren(...state.map(item => { item.el.style.cssText = item.style; return item.el; }));
+  comps = state.map(item => ({ el: item.el, type: item.el.dataset.type }));
+  selectedEl = null;
+  canvas.querySelectorAll('.sel').forEach(el => el.classList.remove('sel'));
+  updateEmptyState();
+}
+document.addEventListener('keydown', e => {
+  const editing = e.target.isContentEditable || /INPUT|TEXTAREA/.test(e.target.tagName);
+  if (!editing && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undoCanvas(); }
+  if (isOverlay && e.key === 'Escape') { e.preventDefault(); closeOverlay(); return; }
+  if (isOverlay && e.key === 'Tab') {
+    const focusable = [...document.getElementById('overlay').querySelectorAll('button, input:not([type="file"]), textarea, [tabindex="0"], [contenteditable="true"]')];
+    const first = focusable[0], last = focusable.at(-1);
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  if (editing || !selectedEl || !e.key.startsWith('Arrow')) return;
+  e.preventDefault();
+  saveUndo();
+  const el = selectedEl, horizontal = /Left|Right/.test(e.key), delta = /Left|Up/.test(e.key) ? -8 : 8;
+  const key = e.shiftKey ? (horizontal ? 'width' : 'height') : (horizontal ? 'left' : 'top');
+  if (e.shiftKey && !getCompDef(el.dataset.type).resizable) return;
+  const limit = horizontal ? getDims().W : getDims().H;
+  el.style[key] = Math.max(e.shiftKey ? 40 : 0, Math.min(limit, parseFloat(el.style[key]) + delta)) + 'px';
+  updateSelectionEditor();
+});
+
 let inlineScale = 1;
 let scrollOffsetY = 0;
 
@@ -1108,7 +1178,7 @@ function renderStyleCards() {
     { n: 2, name: 'Freeform Composition', desc: 'Use the canvas as a module and content inventory; let the model determine placement', label: 'Positions unlocked · Model arranges the layout', img: 'assets/style-free-editorial.jpg', ref: 'Keny Zachelin' },
   ];
   grid.innerHTML = styles.map(s => `
-    <div class="scard ${sel.style === s.name ? 'picked' : ''}" id="s${s.n}" onclick="pickStyle(${s.n},'${s.name}','${s.desc}')">
+    <button type="button" aria-pressed="${sel.style === s.name}" class="scard ${sel.style === s.name ? 'picked' : ''}" id="s${s.n}" onclick="pickStyle(${s.n},'${s.name}','${s.desc}')">
       <div class="sbrowser"><div class="sdot"></div><div class="sdot"></div><div class="sdot"></div><div class="sbar"></div></div>
       <div class="spreview">
         <img class="sshot" src="${s.img}" alt="${s.name} example by ${s.ref}" loading="lazy" decoding="async">
@@ -1118,7 +1188,7 @@ function renderStyleCards() {
         <div class="slname">${s.name}</div>
         <div class="sldesc">${s.label}</div>
       </div>
-    </div>`).join('');
+    </button>`).join('');
 }
 
 function getToolbarHTML() {
@@ -1136,7 +1206,7 @@ function getToolbarHTML() {
   };
   const ic = t => `<svg viewBox="0 0 24 24">${icons[t]}</svg>`;
   return types.map(t => `<button class="tool-btn" onclick="addComp('${t}')">${ic(t)}${labels[t]}</button>`).join('') +
-    `<button class="tool-btn" onclick="clearCanvas()"><svg viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 12.5h9l1-12.5"/></svg>Clear</button>`;
+    `<button class="tool-btn" onclick="undoCanvas()">Undo</button><button class="tool-btn" onclick="clearCanvas()"><svg viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 12.5h9l1-12.5"/></svg>Clear</button>`;
 }
 
 function refreshToolbars() {
@@ -1190,6 +1260,7 @@ function copyText(text) {
 }
 
 function shouldSkipDrag(e, wrap) {
+  if (e.target.closest('.image-dropzone')) return true;
   if (e.target.classList && e.target.classList.contains('rh')) return true;
   let t = e.target;
   while (t && t !== wrap) {
@@ -1206,7 +1277,7 @@ function pointerPoint(e) {
 }
 
 function getCanvas() {
-  return isOverlay ? document.getElementById('canvasFull') : document.getElementById('canvas');
+  return document.getElementById('canvas');
 }
 
 function setupInlineCanvas() {
@@ -1227,22 +1298,22 @@ function setupInlineCanvas() {
   inner.style.height = H + 'px';
 
   document.getElementById('scaleHint').textContent =
-    `1440 × 900px viewport · ${Math.round(inlineScale * 100)}% scale · Scroll to view the full page`;
+    `1440 × 900px viewport · ${Math.round(inlineScale * 100)}% scale · Scroll to view the full page. Expand canvas for a larger, scrollable view on small screens.`;
 }
 
 function setupOverlayCanvas() {
   const { W, H, VH } = getDims();
   const vw = window.innerWidth - 48;
   const vh = window.innerHeight - 60;
-  const scale = Math.min(vw / W, (vh - 52) / VH);
+  const scale = window.innerWidth < 768 ? 0.65 : Math.min(vw / W, (vh - 52) / VH);
   const w = Math.round(W * scale);
   const h = Math.round(VH * scale);
 
   const inner = document.getElementById('overlayInner');
-  inner.style.width = (w + 2) + 'px';
+  inner.style.width = Math.min(w + 2, vw) + 'px';
 
   const ovp = document.getElementById('overlayViewport');
-  ovp.style.width = w + 'px';
+  ovp.style.width = Math.min(w, vw) + 'px';
   ovp.style.height = h + 'px';
 
   const scaled = document.getElementById('overlayScaled');
@@ -1275,6 +1346,7 @@ function initScroll() {
   }, { passive: false });
 
   overlayVP.addEventListener('wheel', e => {
+    if (window.innerWidth < 768) return;
     e.preventDefault();
     const { H, VH } = getDims();
     const scale = getScale();
@@ -1286,26 +1358,29 @@ function initScroll() {
 function openOverlay() {
   document.getElementById('overlay').classList.add('open');
   isOverlay = true;
+  document.getElementById('overlayInner').insertBefore(document.getElementById('selectionEditor'), document.getElementById('overlayViewport'));
   const scale = setupOverlayCanvas();
   document.getElementById('overlayScaled').style.marginTop = `-${Math.round(scrollOffsetY * scale)}px`;
   const src = document.getElementById('canvas');
   const dst = document.getElementById('canvasFull');
-  dst.innerHTML = src.innerHTML;
-  dst.querySelectorAll('.el').forEach(el => attachElEvents(el));
+  dst.appendChild(src);
+  overlayReturnFocus = document.activeElement;
+  document.getElementById('overlayToolbar').querySelector('button').focus();
+  document.querySelectorAll('main > :not(#overlay), .journey-shell, body > .hero, body > footer').forEach(el => el.inert = true);
   if (selectedEl) { selectedEl.classList.remove('sel'); selectedEl = null; }
+  updateSelectionEditor();
   document.body.style.overflow = 'hidden';
 }
 
 function closeOverlay() {
-  const src = document.getElementById('canvasFull');
-  const dst = document.getElementById('canvas');
-  dst.innerHTML = src.innerHTML;
-  dst.querySelectorAll('.el').forEach(el => attachElEvents(el));
-  comps = [];
-  dst.querySelectorAll('.el').forEach(el => comps.push({ el, type: el.dataset.type }));
+  document.getElementById('step2').insertBefore(document.getElementById('selectionEditor'), document.getElementById('canvasViewport'));
+  document.getElementById('canvasScaled').appendChild(document.getElementById('canvas'));
+  document.querySelectorAll('[inert]').forEach(el => el.inert = false);
+  overlayReturnFocus?.focus();
   const scaled = document.getElementById('canvasScaled');
   scaled.style.marginTop = `-${Math.round(scrollOffsetY * inlineScale)}px`;
   if (selectedEl) { selectedEl.classList.remove('sel'); selectedEl = null; }
+  updateSelectionEditor();
   isOverlay = false;
   document.getElementById('overlay').classList.remove('open');
   document.body.style.overflow = '';
@@ -1317,6 +1392,9 @@ function addComp(type) {
   const { W, H, VH } = getDims();
   const canvas = getCanvas();
   const wrap = document.createElement('div');
+  saveUndo();
+  wrap.tabIndex = 0;
+  wrap.setAttribute('aria-label', type + ' module. Use arrow keys to move; Shift plus arrows to resize.');
   wrap.className = 'el is-entering';
   wrap.dataset.type = type;
 
@@ -1326,6 +1404,10 @@ function addComp(type) {
   if (type === 'footer') { x = 0; y = H - def.h; }
   y = Math.max(0, Math.min(H - def.h, y));
 
+  if (type !== 'nav' && type !== 'footer') {
+    const previous = canvas.lastElementChild;
+    if (previous) { x = Math.min(W - def.w, (parseFloat(previous.style.left) || 0) + 48); y = Math.min(H - def.h, (parseFloat(previous.style.top) || 0) + 72); }
+  }
   wrap.style.cssText = `left:${x}px;top:${y}px;width:${def.w}px;height:${def.h}px;`;
   wrap.innerHTML = makeCompHTML(type);
   bindImageInputs(wrap);
@@ -1336,6 +1418,7 @@ function addComp(type) {
     wrap.appendChild(rh);
     const startResize = e => {
       e.stopPropagation(); e.preventDefault();
+      saveUndo();
       selectEl(wrap);
       wrap.classList.remove('is-settling');
       wrap.classList.add('is-dragging');
@@ -1358,12 +1441,15 @@ function attachElEvents(wrap) {
   const startMove = e => {
     if (shouldSkipDrag(e, wrap)) return;
     e.preventDefault();
+    saveUndo();
     selectEl(wrap);
     wrap.classList.remove('is-settling');
     wrap.classList.add('is-dragging');
     const p = pointerPoint(e);
     dragState = { mode: 'move', el: wrap, startX: p.clientX, startY: p.clientY, origL: parseInt(wrap.style.left)||0, origT: parseInt(wrap.style.top)||0 };
   };
+  wrap.addEventListener('focus', () => selectEl(wrap));
+  wrap.addEventListener('click', e => { if (e.target.closest('.image-dropzone')) selectEl(wrap); });
   wrap.addEventListener('mousedown', startMove);
   wrap.addEventListener('touchstart', startMove, { passive: false });
 }
@@ -1388,9 +1474,9 @@ function bindImageInputs(root) {
     if (!zone) return;
     zone.tabIndex = 0;
     zone.setAttribute('role', 'button');
-    if (zone.tagName !== 'LABEL') {
+    {
       zone.addEventListener('click', e => {
-        if (e.target !== input) input.click();
+        if (e.target !== input) { e.preventDefault(); input.click(); }
       });
       zone.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); }
@@ -1398,8 +1484,6 @@ function bindImageInputs(root) {
     }
     const applyImage = file => {
       if (!file || !file.type.startsWith('image/')) return;
-      const oldUrl = zone.dataset.imageUrl;
-      if (oldUrl) URL.revokeObjectURL(oldUrl);
       const url = URL.createObjectURL(file);
       zone.dataset.imageUrl = url;
       zone.style.backgroundImage = `url("${url}")`;
@@ -1418,10 +1502,37 @@ function bindImageInputs(root) {
   });
 }
 
+function updateSelectionEditor() {
+  const editor = document.getElementById('selectionEditor');
+  editor.hidden = !selectedEl || !selectedEl.isConnected;
+  if (editor.hidden) return;
+  editor.querySelectorAll('[data-geometry]').forEach(input => {
+    input.value = Math.round(parseFloat(selectedEl.style[input.dataset.geometry]));
+    input.disabled = /width|height/.test(input.dataset.geometry) && !getCompDef(selectedEl.dataset.type).resizable;
+    input.onchange = () => {
+      saveUndo();
+      const key = input.dataset.geometry, min = /width|height/.test(key) ? 40 : 0;
+      const max = /left|width/.test(key) ? getDims().W : getDims().H;
+      selectedEl.style[key] = Math.min(max, Math.max(min, Number(input.value))) + 'px';
+      updateSelectionEditor();
+    };
+  });
+  const text = document.getElementById('selectionText');
+  text.replaceChildren();
+  selectedEl.querySelectorAll('[contenteditable="true"]').forEach((node, i) => {
+    const label = document.createElement('label');
+    label.textContent = 'Text ' + (i + 1);
+    const input = document.createElement('textarea');
+    input.value = node.innerText;
+    input.oninput = () => node.textContent = input.value;
+    label.appendChild(input); text.appendChild(label);
+  });
+}
 function selectEl(el) {
   if (selectedEl) selectedEl.classList.remove('sel');
   selectedEl = el;
   el.classList.add('sel');
+  updateSelectionEditor();
 }
 
 function applyDrag(e) {
@@ -1450,6 +1561,7 @@ function endDrag() {
   el.classList.add('is-settling');
   setTimeout(() => el.classList.remove('is-settling'), 320);
   dragState = null;
+  updateSelectionEditor();
 }
 
 document.addEventListener('mousemove', applyDrag);
@@ -1462,6 +1574,7 @@ document.addEventListener('keydown', e => {
   if ((e.key === 'Delete' || e.key === 'Backspace') && selectedEl) {
     let t = document.activeElement;
     if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable || t.contentEditable === 'true')) return;
+    saveUndo();
     selectedEl.remove();
     comps = comps.filter(b => b.el !== selectedEl);
     selectedEl = null;
@@ -1480,6 +1593,7 @@ document.addEventListener('keydown', e => {
 });
 
 function clearCanvas() {
+  saveUndo();
   const canvas = getCanvas();
   if (canvas) canvas.innerHTML = '';
   if (!isOverlay) { comps = []; }
@@ -1488,7 +1602,8 @@ function clearCanvas() {
 }
 
 function pickStyle(n, name, desc) {
-  document.querySelectorAll('.scard').forEach(c => c.classList.remove('picked'));
+  document.querySelectorAll('.scard').forEach(c => { c.classList.remove('picked'); c.setAttribute('aria-pressed','false'); });
+  document.getElementById('s' + n).setAttribute('aria-pressed','true');
   document.getElementById('s' + n).classList.add('picked');
   sel.style = name; sel.styleDesc = desc;
   updateStructureMode();
@@ -1590,9 +1705,16 @@ function updateEmptyState() {
   const empty = document.getElementById('canvasEmpty');
   if (empty) empty.style.display = comps.length === 0 ? 'flex' : 'none';
   updateStructureMode();
+  updateSelectionEditor();
 }
 
 function generatePrompt(showFeedback = true) {
+  if (!document.getElementById('userDesc').value.trim()) {
+    document.getElementById('exportStatus').textContent = 'Describe your product before building the brief.';
+    document.getElementById('userDesc').focus();
+    return false;
+  }
+  document.getElementById('exportStatus').textContent = 'Brief ready to copy.';
   if (!window.cachedPrompt) window.cachedPrompt = { claude: '', stitch: '' };
 
   const genButton = document.querySelector('.gen-btn');
@@ -1649,7 +1771,7 @@ function generatePrompt(showFeedback = true) {
   box.addEventListener('animationend', () => box.classList.remove('is-revealing'), { once: true });
   if (showFeedback && genButton) {
     setTimeout(() => {
-      genButton.textContent = genButton.dataset.label || 'Generate context';
+      genButton.textContent = genButton.dataset.label || 'Build brief';
       genButton.classList.remove('is-generating');
       genButton.disabled = false;
     }, 560);
@@ -1657,7 +1779,7 @@ function generatePrompt(showFeedback = true) {
 }
 
 function copyFor(target) {
-  generatePrompt(false);
+  if (generatePrompt(false) === false) return;
   const text = window.cachedPrompt[target];
   if (!text) return;
   document.getElementById('promptOut').textContent = target === 'stitch' ? window.cachedPrompt.stitch : window.cachedPrompt.claude;
@@ -1665,6 +1787,7 @@ function copyFor(target) {
     const btn = document.getElementById(target === 'claude' ? 'btnClaude' : 'btnStitch');
     const orig = btn.innerHTML;
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 6.5l-11 11-5-5"/></svg>Copied';
+    document.getElementById('exportStatus').textContent = 'Brief copied. Paste it into your design tool.';
     btn.classList.add('copied');
     setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 1500);
   }).catch(() => {
@@ -1727,7 +1850,7 @@ function initJourneyNav() {
 }
 
 let resizeRaf = 0;
-window.addEventListener('load', () => { renderStyleCards(); renderPresetChips(); refreshToolbars(); setupInlineCanvas(); initScroll(); updateEmptyState(); initMotion(); initHeroArtMotion(); initJourneyNav(); });
+document.addEventListener('DOMContentLoaded', () => { renderStyleCards(); renderPresetChips(); refreshToolbars(); setupInlineCanvas(); initScroll(); updateEmptyState(); initMotion(); initHeroArtMotion(); initJourneyNav(); }, { once: true });
 window.addEventListener('resize', () => {
   cancelAnimationFrame(resizeRaf);
   resizeRaf = requestAnimationFrame(setupInlineCanvas);
